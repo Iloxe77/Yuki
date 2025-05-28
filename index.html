@@ -52,4 +52,14 @@
     document.getElementById("noteForm").addEventListener("submit", function(event) {
       event.preventDefault();
       const noteInput = document.getElementById("noteInput");
-      const no
+      const noteText = noteInput.value.trim();
+      if (noteText !== "") {
+        savedNotes.push(noteText);
+        localStorage.setItem("notes", JSON.stringify(savedNotes));
+        displayNotes();
+        noteInput.value = "";
+      }
+    });
+  </script>
+</body>
+</html>
