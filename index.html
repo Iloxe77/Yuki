@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Moje Notatki</title>
+  <style>
+    button.usun {
+      margin-left: 10px;
+      color: red;
+    }
+  </style>
 </head>
 <body>
   <h1>Moje Notatki</h1>
@@ -18,13 +24,24 @@
 
   <script>
     const notesList = document.getElementById("notesList");
-    const savedNotes = JSON.parse(localStorage.getItem("notes")) || [];
+    let savedNotes = JSON.parse(localStorage.getItem("notes")) || [];
 
     function displayNotes() {
       notesList.innerHTML = "";
-      savedNotes.forEach(note => {
+      savedNotes.forEach((note, index) => {
         const li = document.createElement("li");
         li.textContent = note;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Usuń";
+        deleteBtn.className = "usun";
+        deleteBtn.onclick = () => {
+          savedNotes.splice(index, 1);
+          localStorage.setItem("notes", JSON.stringify(savedNotes));
+          displayNotes();
+        };
+
+        li.appendChild(deleteBtn);
         notesList.appendChild(li);
       });
     }
@@ -35,13 +52,3 @@
       event.preventDefault();
       const noteInput = document.getElementById("noteInput");
       const noteText = noteInput.value.trim();
-      if (noteText !== "") {
-        savedNotes.push(noteText);
-        localStorage.setItem("notes", JSON.stringify(savedNotes));
-        displayNotes();
-        noteInput.value = "";
-      }
-    });
-  </script>
-</body>
-</html>
