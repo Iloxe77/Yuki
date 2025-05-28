@@ -4,62 +4,157 @@
   <meta charset="UTF-8">
   <title>Moje Notatki</title>
   <style>
-    button.usun {
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    nav button {
+      margin-right: 10px;
+      padding: 10px;
+    }
+    .section {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+    textarea, input[type="text"], input[type="date"] {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .note, .task {
+      margin-bottom: 5px;
+    }
+    .note button, .task button {
       margin-left: 10px;
       color: red;
     }
   </style>
 </head>
 <body>
-  <h1>Moje Notatki</h1>
+  <h1>Moje Notatki i Plan Działania</h1>
+  <nav>
+    <button onclick="switchTab('sprawy')">Sprawy bieżące</button>
+    <button onclick="switchTab('zalatwienia')">Do załatwienia</button>
+    <button onclick="switchTab('plan')">Plan działania</button>
+  </nav>
 
-  <form id="noteForm">
-    <label for="noteInput">Wpisz notatkę:</label><br>
-    <textarea id="noteInput" rows="4" cols="50"></textarea><br>
-    <button type="submit">Zapisz</button>
-  </form>
+  <section id="sprawy" class="section active">
+    <h2>Sprawy bieżące</h2>
+    <textarea id="noteInputSprawy"></textarea><br>
+    <button onclick="addNote('Sprawy')">Dodaj notatkę</button>
+    <ul id="notesListSprawy"></ul>
+  </section>
 
-  <h2>Zapisane notatki:</h2>
-  <ul id="notesList"></ul>
+  <section id="zalatwienia" class="section">
+    <h2>Do załatwienia</h2>
+    <textarea id="noteInputZalatwienia"></textarea><br>
+    <button onclick="addNote('Zalatwienia')">Dodaj notatkę</button>
+    <ul id="notesListZalatwienia"></ul>
+  </section>
+
+  <section id="plan" class="section">
+    <h2>Plan działania</h2>
+    <input type="text" id="taskDesc" placeholder="Opis zadania"><br>
+    <input type="date" id="taskDate"><br>
+    <button onclick="addTask()">Dodaj zadanie</button>
+    <ul id="taskList"></ul>
+  </section>
 
   <script>
-    const notesList = document.getElementById("notesList");
-    let savedNotes = JSON.parse(localStorage.getItem("notes")) || [];
+    function switchTab(tab) {
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+    }
 
-    function displayNotes() {
-      notesList.innerHTML = "";
-      savedNotes.forEach((note, index) => {
-        const li = document.createElement("li");
+    function addNote(type) {
+      const inputId = type === 'Sprawy' ? 'noteInputSprawy' : 'noteInputZalatwienia';
+      const listId = type === 'Sprawy' ? 'notesListSprawy' : 'notesListZalatwienia';
+      const storageKey = 'notes_' + type;
+
+      const input = document.getElementById(inputId);
+      const noteText = input.value.trim();
+      if (noteText === '') return;
+
+      let notes = JSON.parse(localStorage.getItem(storageKey)) || [];
+      notes.push(noteText);
+      localStorage.setItem(storageKey, JSON.stringify(notes));
+      input.value = '';
+      renderNotes(type);
+    }
+
+    function deleteNote(index, type) {
+      const storageKey = 'notes_' + type;
+      let notes = JSON.parse(localStorage.getItem(storageKey)) || [];
+      notes.splice(index, 1);
+      localStorage.setItem(storageKey, JSON.stringify(notes));
+      renderNotes(type);
+    }
+
+    function renderNotes(type) {
+      const listId = type === 'Sprawy' ? 'notesListSprawy' : 'notesListZalatwienia';
+      const storageKey = 'notes_' + type;
+      const ul = document.getElementById(listId);
+      ul.innerHTML = '';
+
+      const notes = JSON.parse(localStorage.getItem(storageKey)) || [];
+      notes.forEach((note, index) => {
+        const li = document.createElement('li');
+        li.className = 'note';
         li.textContent = note;
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Usuń";
-        deleteBtn.className = "usun";
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Usuń';
+        delBtn.onclick = () => deleteNote(index, type);
+        li.appendChild(delBtn);
 
-        deleteBtn.onclick = () => {
-          savedNotes.splice(index, 1);
-          localStorage.setItem("notes", JSON.stringify(savedNotes));
-          displayNotes();
-        };
-
-        li.appendChild(deleteBtn);
-        notesList.appendChild(li);
+        ul.appendChild(li);
       });
     }
 
-    displayNotes();
+    function addTask() {
+      const desc = document.getElementById('taskDesc').value.trim();
+      const date = document.getElementById('taskDate').value;
+      if (desc === '' || date === '') return;
 
-    document.getElementById("noteForm").addEventListener("submit", function(event) {
-      event.preventDefault();
-      const noteInput = document.getElementById("noteInput");
-      const noteText = noteInput.value.trim();
-      if (noteText !== "") {
-        savedNotes.push(noteText);
-        localStorage.setItem("notes", JSON.stringify(savedNotes));
-        displayNotes();
-        noteInput.value = "";
-      }
-    });
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      tasks.push({ desc, date });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      document.getElementById('taskDesc').value = '';
+      document.getElementById('taskDate').value = '';
+      renderTasks();
+    }
+
+    function deleteTask(index) {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      tasks.splice(index, 1);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const ul = document.getElementById('taskList');
+      ul.innerHTML = '';
+
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.className = 'task';
+        li.textContent = `${task.desc} - do ${task.date}`;
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Usuń';
+        delBtn.onclick = () => deleteTask(index);
+        li.appendChild(delBtn);
+
+        ul.appendChild(li);
+      });
+    }
+
+    // Ładowanie danych przy starcie strony
+    renderNotes('Sprawy');
+    renderNotes('Zalatwienia');
+    renderTasks();
   </script>
 </body>
 </html>
