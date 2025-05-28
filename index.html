@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Moje Notatki</title>
+</head>
+<body>
+  <h1>Moje Notatki</h1>
+
+  <form id="noteForm">
+    <label for="noteInput">Wpisz notatkę:</label><br>
+    <textarea id="noteInput" rows="4" cols="50"></textarea><br>
+    <button type="submit">Zapisz</button>
+  </form>
+
+  <h2>Zapisane notatki:</h2>
+  <ul id="notesList"></ul>
+
+  <script>
+    const notesList = document.getElementById("notesList");
+    const savedNotes = JSON.parse(localStorage.getItem("notes")) || [];
+
+    function displayNotes() {
+      notesList.innerHTML = "";
+      savedNotes.forEach(note => {
+        const li = document.createElement("li");
+        li.textContent = note;
+        notesList.appendChild(li);
+      });
+    }
+
+    displayNotes();
+
+    document.getElementById("noteForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      const noteInput = document.getElementById("noteInput");
+      const noteText = noteInput.value.trim();
+      if (noteText !== "") {
+        savedNotes.push(noteText);
+        localStorage.setItem("notes", JSON.stringify(savedNotes));
+        displayNotes();
+        noteInput.value = "";
+      }
+    });
+  </script>
+</body>
+</html>
