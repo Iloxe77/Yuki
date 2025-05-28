@@ -2,188 +2,121 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <title>Moje Notatki</title>
+  <title>Moje Prompty do ChatGPT</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
     }
-    nav button {
-      margin-right: 10px;
-      padding: 10px;
-    }
-    .section {
-      display: none;
-    }
-    .active {
-      display: block;
-    }
-    textarea, input[type="text"], input[type="date"] {
+    textarea, input[type="text"] {
       width: 100%;
       margin-bottom: 10px;
     }
-    .note, .task {
-      margin-bottom: 5px;
+    button {
+      margin-top: 5px;
     }
-    .note button, .task button {
-      margin-left: 10px;
-      color: red;
-    }
-    .readonly {
-      background-color: #f5f5f5;
-      padding: 15px;
+    .prompt-entry {
+      margin-bottom: 10px;
+      padding: 10px;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 4px;
+    }
+    .response {
+      background-color: #f5f5f5;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <h1>Moje Notatki i Plan Działania</h1>
-  <nav>
-    <button onclick="switchTab('sprawy')">Sprawy bieżące</button>
-    <button onclick="switchTab('zalatwienia')">Do załatwienia</button>
-    <button onclick="switchTab('plan')">Plan działania</button>
-    <button onclick="switchTab('wizytowka')">Wizytówka: LivoLINK + AI</button>
-  </nav>
+  <h1>Moje Prompty do ChatGPT</h1>
 
-  <section id="sprawy" class="section active">
-    <h2>Sprawy bieżące</h2>
-    <textarea id="noteInputSprawy"></textarea><br>
-    <button onclick="addNote('Sprawy')">Dodaj notatkę</button>
-    <ul id="notesListSprawy"></ul>
-  </section>
+  <h2>Dodaj nowy prompt</h2>
+  <input type="text" id="promptTitle" placeholder="Tytuł prompta">
+  <textarea id="promptText" rows="4" placeholder="Treść prompta"></textarea>
+  <button onclick="addPrompt()">Zapisz prompt</button>
 
-  <section id="zalatwienia" class="section">
-    <h2>Do załatwienia</h2>
-    <textarea id="noteInputZalatwienia"></textarea><br>
-    <button onclick="addNote('Zalatwienia')">Dodaj notatkę</button>
-    <ul id="notesListZalatwienia"></ul>
-  </section>
+  <h2>Lista zapisanych promptów</h2>
+  <div id="promptList"></div>
 
-  <section id="plan" class="section">
-    <h2>Plan działania</h2>
-    <input type="text" id="taskDesc" placeholder="Opis zadania"><br>
-    <input type="date" id="taskDate"><br>
-    <button onclick="addTask()">Dodaj zadanie</button>
-    <ul id="taskList"></ul>
-  </section>
-
-  <section id="wizytowka" class="section">
-    <h2>Wizytówka: Jak działa LivoLINK z modułem agentów AI</h2>
-    <div class="readonly">
-      <p><strong>LivoLINK</strong> to system do kompleksowego zarządzania tłumaczeniami, zintegrowany z inteligentnym modułem <strong>agentów AI</strong>, wspierającym automatyzację procesów, komunikację z klientami i optymalizację pracy zespołu.</p>
-
-      <h3>Co robi moduł AI agentów:</h3>
-      <ul>
-        <li>automatycznie przyjmuje i klasyfikuje zlecenia od klientów,</li>
-        <li>wstępnie wycenia i przypisuje zadania do wykonawców,</li>
-        <li>monitoruje postępy i przypomina o terminach,</li>
-        <li>rozpoznaje ryzyka (np. opóźnienia, konflikty zasobów) i zgłasza sugestie,</li>
-        <li>komunikuje się z klientami w ich języku – przez e-mail, chat lub panel klienta.</li>
-      </ul>
-
-      <h3>Dla kogo?</h3>
-      <p>Moduł agentów AI w LivoLINK to idealne rozwiązanie dla biur tłumaczeń, działów lokalizacji, agencji e-commerce i każdej firmy, która zarządza złożonymi zleceniami tłumaczeniowymi z udziałem wielu ludzi i systemów.</p>
-
-      <h3>Bezpieczeństwo i kontrola</h3>
-      <p>Administrator może konfigurować poziom autonomii agentów – od pełnej automatyzacji po zatwierdzanie każdej decyzji przez człowieka. Dane są bezpieczne, a cała aktywność jest rejestrowana w systemie audytu.</p>
-    </div>
-  </section>
+  <div id="chatResponse" class="response"></div>
 
   <script>
-    function switchTab(tab) {
-      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-      document.getElementById(tab).classList.add('active');
+    const promptListDiv = document.getElementById('promptList');
+    const responseDiv = document.getElementById('chatResponse');
+
+    function getPrompts() {
+      return JSON.parse(localStorage.getItem('prompts') || '[]');
     }
 
-    function addNote(type) {
-      const inputId = type === 'Sprawy' ? 'noteInputSprawy' : 'noteInputZalatwienia';
-      const listId = type === 'Sprawy' ? 'notesListSprawy' : 'notesListZalatwienia';
-      const storageKey = 'notes_' + type;
-
-      const input = document.getElementById(inputId);
-      const noteText = input.value.trim();
-      if (noteText === '') return;
-
-      let notes = JSON.parse(localStorage.getItem(storageKey)) || [];
-      notes.push(noteText);
-      localStorage.setItem(storageKey, JSON.stringify(notes));
-      input.value = '';
-      renderNotes(type);
+    function savePrompts(prompts) {
+      localStorage.setItem('prompts', JSON.stringify(prompts));
     }
 
-    function deleteNote(index, type) {
-      const storageKey = 'notes_' + type;
-      let notes = JSON.parse(localStorage.getItem(storageKey)) || [];
-      notes.splice(index, 1);
-      localStorage.setItem(storageKey, JSON.stringify(notes));
-      renderNotes(type);
+    function addPrompt() {
+      const title = document.getElementById('promptTitle').value.trim();
+      const text = document.getElementById('promptText').value.trim();
+      if (!title || !text) return;
+
+      const prompts = getPrompts();
+      prompts.push({ title, text });
+      savePrompts(prompts);
+      document.getElementById('promptTitle').value = '';
+      document.getElementById('promptText').value = '';
+      renderPrompts();
     }
 
-    function renderNotes(type) {
-      const listId = type === 'Sprawy' ? 'notesListSprawy' : 'notesListZalatwienia';
-      const storageKey = 'notes_' + type;
-      const ul = document.getElementById(listId);
-      ul.innerHTML = '';
+    function deletePrompt(index) {
+      const prompts = getPrompts();
+      prompts.splice(index, 1);
+      savePrompts(prompts);
+      renderPrompts();
+    }
 
-      const notes = JSON.parse(localStorage.getItem(storageKey)) || [];
-      notes.forEach((note, index) => {
-        const li = document.createElement('li');
-        li.className = 'note';
-        li.textContent = note;
+    async function sendToChatGPT(prompt) {
+      const apiKey = prompt('Wklej swój klucz API OpenAI:');
+      if (!apiKey) return;
 
-        const delBtn = document.createElement('button');
-        delBtn.textContent = 'Usuń';
-        delBtn.onclick = () => deleteNote(index, type);
-        li.appendChild(delBtn);
+      const body = {
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "user", content: prompt }
+        ]
+      };
 
-        ul.appendChild(li);
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json();
+      const reply = data.choices?.[0]?.message?.content || 'Brak odpowiedzi';
+      responseDiv.textContent = reply;
+    }
+
+    function renderPrompts() {
+      const prompts = getPrompts();
+      promptListDiv.innerHTML = '';
+
+      prompts.forEach((prompt, index) => {
+        const div = document.createElement('div');
+        div.className = 'prompt-entry';
+        div.innerHTML = `
+          <strong>${prompt.title}</strong><br>
+          <pre>${prompt.text}</pre>
+          <button onclick="sendToChatGPT(\`${prompt.text.replace(/`/g, '\\`')}\`)">Wyślij do ChatGPT</button>
+          <button onclick="deletePrompt(${index})">Usuń</button>
+        `;
+        promptListDiv.appendChild(div);
       });
     }
 
-    function addTask() {
-      const desc = document.getElementById('taskDesc').value.trim();
-      const date = document.getElementById('taskDate').value;
-      if (desc === '' || date === '') return;
-
-      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-      tasks.push({ desc, date });
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      document.getElementById('taskDesc').value = '';
-      document.getElementById('taskDate').value = '';
-      renderTasks();
-    }
-
-    function deleteTask(index) {
-      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-      tasks.splice(index, 1);
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      renderTasks();
-    }
-
-    function renderTasks() {
-      const ul = document.getElementById('taskList');
-      ul.innerHTML = '';
-
-      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-      tasks.forEach((task, index) => {
-        const li = document.createElement('li');
-        li.className = 'task';
-        li.textContent = `${task.desc} - do ${task.date}`;
-
-        const delBtn = document.createElement('button');
-        delBtn.textContent = 'Usuń';
-        delBtn.onclick = () => deleteTask(index);
-        li.appendChild(delBtn);
-
-        ul.appendChild(li);
-      });
-    }
-
-    // Ładowanie danych przy starcie strony
-    renderNotes('Sprawy');
-    renderNotes('Zalatwienia');
-    renderTasks();
+    renderPrompts();
   </script>
 </body>
 </html>
