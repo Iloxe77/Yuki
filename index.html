@@ -10,14 +10,18 @@
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f6f6f6; color: #333; }
     header { background-color: #002f5f; color: white; padding: 20px; text-align: center; }
     nav { background-color: #e0e0e0; padding: 10px 30px; display: flex; flex-wrap: wrap; justify-content: center; }
-    nav a { margin: 5px 15px; text-decoration: none; color: #002f5f; font-weight: bold; }
+    nav a { margin: 5px 15px; text-decoration: none; color: #002f5f; font-weight: bold; cursor: pointer; }
     nav a:hover { text-decoration: underline; }
     main { padding: 30px; max-width: 1000px; margin: auto; background-color: white; }
-    footer { background-color: #002f5f; color: white; text-align: center; padding: 15px; margin-top: 30px; }
-    section { margin-bottom: 40px; scroll-margin-top: 80px; }
+    section { display: none; }
+    section.active { display: block; }
     h2 { color: #002f5f; }
     ul { padding-left: 20px; }
-    .firmy-lista li { margin-bottom: 5px; }
+    li { margin-bottom: 10px; }
+    label { display: block; margin-top: 15px; }
+    input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+    input[type="submit"] { width: auto; background-color: #002f5f; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-top: 20px; }
+    footer { background-color: #002f5f; color: white; text-align: center; padding: 15px; margin-top: 30px; }
     @media (max-width: 600px) {
       nav { flex-direction: column; align-items: center; }
     }
@@ -30,13 +34,13 @@
   </header>
 
   <nav>
-    <a href="#o-standardach">O standardach</a>
-    <a href="#lista-firm">Lista firm</a>
-    <a href="#zgloszenie">Dołącz do inicjatywy</a>
+    <a onclick="showSection('o-standardach')">O standardach</a>
+    <a onclick="showSection('lista-firm')">Lista firm</a>
+    <a onclick="showSection('dolacz')">Dołącz do inicjatywy</a>
   </nav>
 
   <main>
-    <section id="o-standardach">
+    <section id="o-standardach" class="active">
       <h2>O inicjatywie</h2>
       <p>Strona powstała, aby promować i wspierać stosowanie standardów jakościowych w branży tłumaczeniowej. Naszym celem jest edukacja klientów oraz wyróżnienie firm i specjalistów, którzy pracują zgodnie z normami takimi jak:</p>
       <ul>
@@ -49,7 +53,7 @@
 
     <section id="lista-firm">
       <h2>Firmy i tłumacze stosujący standardy</h2>
-      <ul class="firmy-lista">
+      <ul>
         <li><strong>Omero Sp. z o.o.</strong> – ISO 17100, ISO 27001, procedury PE zgodne z ISO 18587</li>
         <li><strong>LinguaLAB</strong> – specjalizacja w MTPE, deklaracja zgodności z ISO 18587</li>
         <li><strong>Tłumacz Anna Kowalska</strong> – niezależna lingwistka, praca z CAT i QA</li>
@@ -57,20 +61,20 @@
       <p>Lista jest rozwijana – zgłoś się, jeśli chcesz dołączyć.</p>
     </section>
 
-    <section id="zgloszenie">
+    <section id="dolacz">
       <h2>Dołącz do inicjatywy</h2>
       <p>Jeśli Twoja firma lub Ty jako tłumacz stosujesz powyższe standardy – wypełnij krótki formularz zgłoszeniowy:</p>
       <form action="mailto:kontakt@standardytlumaczen.pl" method="post" enctype="text/plain">
-        <label for="nazwa">Nazwa firmy lub imię i nazwisko:</label><br>
-        <input type="text" id="nazwa" name="Nazwa" required style="width:100%; padding:8px; margin:8px 0;"><br>
+        <label for="nazwa">Nazwa firmy lub imię i nazwisko:</label>
+        <input type="text" id="nazwa" name="Nazwa" required>
 
-        <label for="standardy">Stosowane standardy:</label><br>
-        <input type="text" id="standardy" name="Standardy" required style="width:100%; padding:8px; margin:8px 0;"><br>
+        <label for="standardy">Stosowane standardy:</label>
+        <input type="text" id="standardy" name="Standardy" required>
 
-        <label for="link">Link do strony lub profilu:</label><br>
-        <input type="url" id="link" name="Link" style="width:100%; padding:8px; margin:8px 0;"><br>
+        <label for="link">Link do strony lub profilu:</label>
+        <input type="url" id="link" name="Link">
 
-        <input type="submit" value="Wyślij zgłoszenie" style="padding:10px 20px; background-color:#002f5f; color:white; border:none; cursor:pointer;">
+        <input type="submit" value="Wyślij zgłoszenie">
       </form>
     </section>
   </main>
@@ -78,5 +82,13 @@
   <footer>
     <p>&copy; 2025 Standardy Tłumaczeń | Opracowanie: Omero Sp. z o.o.</p>
   </footer>
+
+  <script>
+    function showSection(id) {
+      const sections = document.querySelectorAll('main section');
+      sections.forEach(section => section.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+  </script>
 </body>
 </html>
