@@ -2,121 +2,66 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <title>Moje Prompty do ChatGPT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Inicjatywa na rzecz standardów branży tłumaczeń. Lista firm i tłumaczy stosujących normy jakościowe, takie jak ISO 17100, 18587, 27001.">
+  <title>Standardy Tłumaczeń</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    textarea, input[type="text"] {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-    button {
-      margin-top: 5px;
-    }
-    .prompt-entry {
-      margin-bottom: 10px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .response {
-      background-color: #f5f5f5;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 4px;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f6f6f6; color: #333; }
+    header { background-color: #002f5f; color: white; padding: 20px 30px; text-align: center; }
+    nav { background-color: #e0e0e0; padding: 10px 30px; }
+    nav a { margin-right: 20px; text-decoration: none; color: #002f5f; font-weight: bold; }
+    main { padding: 30px; max-width: 1000px; margin: auto; background-color: white; }
+    footer { background-color: #002f5f; color: white; text-align: center; padding: 15px; margin-top: 30px; }
+    section { margin-bottom: 40px; }
+    h2 { color: #002f5f; }
+    ul { padding-left: 20px; }
+    .firmy-lista li { margin-bottom: 5px; }
   </style>
 </head>
 <body>
-  <h1>Moje Prompty do ChatGPT</h1>
+  <header>
+    <h1>Standardy Branży Tłumaczeń</h1>
+    <p>Wiedza, jakość, odpowiedzialność.</p>
+  </header>
 
-  <h2>Dodaj nowy prompt</h2>
-  <input type="text" id="promptTitle" placeholder="Tytuł prompta">
-  <textarea id="promptText" rows="4" placeholder="Treść prompta"></textarea>
-  <button onclick="addPrompt()">Zapisz prompt</button>
+  <nav>
+    <a href="#o-standardach">O standardach</a>
+    <a href="#lista-firm">Lista firm</a>
+    <a href="#zgloszenie">Dołącz do inicjatywy</a>
+  </nav>
 
-  <h2>Lista zapisanych promptów</h2>
-  <div id="promptList"></div>
+  <main>
+    <section id="o-standardach">
+      <h2>O inicjatywie</h2>
+      <p>Strona powstała, aby promować i wspierać stosowanie standardów jakościowych w branży tłumaczeniowej. Naszym celem jest edukacja klientów oraz wyróżnienie firm i specjalistów, którzy pracują zgodnie z normami takimi jak:</p>
+      <ul>
+        <li>ISO 17100 – usługi tłumaczeniowe</li>
+        <li>ISO 18587 – postedycja tłumaczenia maszynowego</li>
+        <li>ISO 27001 – bezpieczeństwo informacji</li>
+      </ul>
+      <p>Standardy oznaczają przejrzystość, jakość i odpowiedzialność – dlatego chcemy, by były powszechnie znane i stosowane.</p>
+    </section>
 
-  <div id="chatResponse" class="response"></div>
+    <section id="lista-firm">
+      <h2>Firmy i tłumacze stosujący standardy</h2>
+      <ul class="firmy-lista">
+        <li><strong>Omero Sp. z o.o.</strong> – ISO 17100, ISO 27001, procedury PE zgodne z ISO 18587</li>
+        <li><strong>LinguaLAB</strong> – specjalizacja w MTPE, deklaracja zgodności z ISO 18587</li>
+        <li><strong>Tłumacz Anna Kowalska</strong> – niezależna lingwistka, praca z CAT i QA</li>
+      </ul>
+      <p>Lista jest rozwijana – zgłoś się, jeśli chcesz dołączyć.</p>
+    </section>
 
-  <script>
-    const promptListDiv = document.getElementById('promptList');
-    const responseDiv = document.getElementById('chatResponse');
+    <section id="zgloszenie">
+      <h2>Dołącz do inicjatywy</h2>
+      <p>Jeśli Twoja firma lub Ty jako tłumacz stosujesz powyższe standardy – wypełnij krótki formularz zgłoszeniowy:</p>
+      <p><a href="mailto:kontakt@standardytlumaczen.pl">kontakt@standardytlumaczen.pl</a></p>
+      <p>W zgłoszeniu podaj: nazwę firmy / imię i nazwisko, rodzaj stosowanych standardów oraz link do strony internetowej lub profilu zawodowego.</p>
+    </section>
+  </main>
 
-    function getPrompts() {
-      return JSON.parse(localStorage.getItem('prompts') || '[]');
-    }
-
-    function savePrompts(prompts) {
-      localStorage.setItem('prompts', JSON.stringify(prompts));
-    }
-
-    function addPrompt() {
-      const title = document.getElementById('promptTitle').value.trim();
-      const text = document.getElementById('promptText').value.trim();
-      if (!title || !text) return;
-
-      const prompts = getPrompts();
-      prompts.push({ title, text });
-      savePrompts(prompts);
-      document.getElementById('promptTitle').value = '';
-      document.getElementById('promptText').value = '';
-      renderPrompts();
-    }
-
-    function deletePrompt(index) {
-      const prompts = getPrompts();
-      prompts.splice(index, 1);
-      savePrompts(prompts);
-      renderPrompts();
-    }
-
-    async function sendToChatGPT(prompt) {
-      const apiKey = prompt('Wklej swój klucz API OpenAI:');
-      if (!apiKey) return;
-
-      const body = {
-        model: "gpt-3.5-turbo",
-        messages: [
-          { role: "user", content: prompt }
-        ]
-      };
-
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(body)
-      });
-
-      const data = await response.json();
-      const reply = data.choices?.[0]?.message?.content || 'Brak odpowiedzi';
-      responseDiv.textContent = reply;
-    }
-
-    function renderPrompts() {
-      const prompts = getPrompts();
-      promptListDiv.innerHTML = '';
-
-      prompts.forEach((prompt, index) => {
-        const div = document.createElement('div');
-        div.className = 'prompt-entry';
-        div.innerHTML = `
-          <strong>${prompt.title}</strong><br>
-          <pre>${prompt.text}</pre>
-          <button onclick="sendToChatGPT(\`${prompt.text.replace(/`/g, '\\`')}\`)">Wyślij do ChatGPT</button>
-          <button onclick="deletePrompt(${index})">Usuń</button>
-        `;
-        promptListDiv.appendChild(div);
-      });
-    }
-
-    renderPrompts();
-  </script>
+  <footer>
+    <p>&copy; 2025 Standardy Tłumaczeń | Opracowanie: Omero Sp. z o.o.</p>
+  </footer>
 </body>
 </html>
